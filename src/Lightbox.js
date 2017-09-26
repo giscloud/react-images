@@ -13,6 +13,30 @@ import Portal from './components/Portal';
 
 import { bindFunctions, canUseDom, deepMerge } from './utils';
 
+
+const defaultPreviewResolver = (descriptor) => {
+	const {
+		onClick,
+		className,
+		sizes,
+		document: { alt, src },
+		srcset,
+		style,
+	} = descriptor;
+
+	return (
+		<img
+			className={className}
+			onClick={onClick}
+			sizes={sizes}
+			alt={alt}
+			src={src}
+			srcSet={srcset}
+			style={style}
+		/>
+	);
+};
+
 class Lightbox extends Component {
 	constructor (props) {
 		super(props);
@@ -208,6 +232,7 @@ class Lightbox extends Component {
 			onClickImage,
 			showImageCount,
 			showThumbnails,
+			previewResolver,
 		} = this.props;
 
 		if (!images || !images.length) return null;
@@ -234,18 +259,17 @@ class Lightbox extends Component {
 					https://fb.me/react-unknown-prop is resolved
 					<Swipeable onSwipedLeft={this.gotoNext} onSwipedRight={this.gotoPrev} />
 				*/}
-				<img
-					className={css(classes.image)}
-					onClick={!!onClickImage && onClickImage}
-					sizes={sizes}
-					alt={image.alt}
-					src={image.src}
-					srcSet={srcset}
-					style={{
+				{previewResolver({
+					className: css(classes.image),
+					onClick: !!onClickImage && onClickImage,
+					style: {
 						cursor: this.props.onClickImage ? 'pointer' : 'auto',
 						maxHeight: `calc(100vh - ${heightOffset})`,
-					}}
-				/>
+					},
+					sizes,
+					srcset,
+					document: image,
+				})}
 				<Footer
 					caption={images[currentImage].caption}
 					countCurrent={currentImage + 1}
@@ -301,6 +325,7 @@ Lightbox.propTypes = {
 	onClickPrev: PropTypes.func,
 	onClose: PropTypes.func.isRequired,
 	preloadNextImage: PropTypes.bool,
+	previewResolver: PropTypes.func,
 	rightArrowTitle: PropTypes.string,
 	showCloseButton: PropTypes.bool,
 	showImageCount: PropTypes.bool,
@@ -348,3 +373,4 @@ const classes = StyleSheet.create({
 });
 
 export default Lightbox;
+export { defaultPreviewResolver };
