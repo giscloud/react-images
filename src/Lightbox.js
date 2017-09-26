@@ -193,6 +193,7 @@ class Lightbox extends Component {
 			showCloseButton,
 			showThumbnails,
 			width,
+			toolbar,
 		} = this.props;
 
 		if (!isOpen) return <span key="closed" />;
@@ -208,6 +209,11 @@ class Lightbox extends Component {
 				onClick={!!backdropClosesModal && this.closeBackdrop}
 				onTouchEnd={!!backdropClosesModal && this.closeBackdrop}
 			>
+				{toolbar
+						? <div className={css(classes.toolbar)}>
+							{toolbar(this.props, this.state)}
+						</div>
+						: null}
 				<div className={css(classes.content)} style={{ marginBottom: offsetThumbnails, maxWidth: width }}>
 					<Header
 						customControls={customControls}
@@ -332,6 +338,7 @@ Lightbox.propTypes = {
 	showThumbnails: PropTypes.bool,
 	theme: PropTypes.object,
 	thumbnailOffset: PropTypes.number,
+	toolbar: PropTypes.func,
 	width: PropTypes.number,
 };
 Lightbox.defaultProps = {
@@ -342,11 +349,13 @@ Lightbox.defaultProps = {
 	leftArrowTitle: 'Previous (Left arrow key)',
 	onClickShowNextImage: true,
 	preloadNextImage: true,
+	previewResolver: defaultPreviewResolver,
 	rightArrowTitle: 'Next (Right arrow key)',
 	showCloseButton: true,
 	showImageCount: true,
 	theme: {},
 	thumbnailOffset: 2,
+	toolbar: null,
 	width: 1024,
 };
 Lightbox.childContextTypes = {
@@ -369,6 +378,14 @@ const classes = StyleSheet.create({
 		// disable user select
 		WebkitTouchCallout: 'none',
 		userSelect: 'none',
+	},
+	toolbar: {
+		backgroundColor: 'rgb(255, 255, 255)',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		zIndex: 1000,
 	},
 });
 
