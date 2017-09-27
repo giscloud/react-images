@@ -1,7 +1,41 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { css, StyleSheet } from 'aphrodite/no-important';
-import Lightbox from 'react-images';
+import Lightbox, { defaultPreviewResolver } from 'react-images';
+
+const previewResolver = (descriptor) => {
+	if (descriptor.document.document) {
+		if (!document.documentElement) {
+			return null;
+		} else {
+			const doc = document.documentElement;
+			const w = Math.max(doc.clientWidth, window.innerWidth || 0);
+			const h = Math.max(doc.clientHeight, window.innerHeight || 0);
+
+			const height = Math.min(w, h) * 0.7;
+			const width = Math.min(w, h) * 0.6;
+
+			const { onClick, className, document: { src }, style } = descriptor;
+
+			return (
+				<div
+					className={className}
+					style={{ ...style, width, height }}
+					onClick={onClick}
+				>
+					<iframe
+						title="pdf document"
+						src={src}
+						width="100%"
+						height="100%"
+					/>
+				</div>
+			);
+		}
+	} else {
+		return defaultPreviewResolver(descriptor);
+	}
+};
 
 class Gallery extends Component {
 	constructor () {
@@ -57,15 +91,30 @@ class Gallery extends Component {
 
 		if (!images) return;
 
-		const gallery = images.filter(i => i.useForDemo).map((obj, i) => {
+		const gallery = images.filter(i => i.useForDemo).map(({ src, orientation, thumbnail, document }, i) => {
 			return (
 				<a
-					href={obj.src}
-					className={css(classes.thumbnail, classes[obj.orientation])}
+					href={src}
+					className={css(classes.thumbnail, classes[orientation])}
 					key={i}
 					onClick={(e) => this.openLightbox(i, e)}
 				>
-					<img src={obj.thumbnail} className={css(classes.source)} />
+					{document
+						? <div
+							style={{
+								width: '100%',
+								height: 240,
+								display: 'inline-block',
+								backgroundColor: 'rgb(224, 224, 224)',
+								lineHeight: '240px',
+								color: 'rgb(176, 176, 176)',
+								fontSize: '22px',
+								textAlign: 'center',
+							}}
+						>
+							{src.match(/\.(\w*)$/) && src.match(/\.(\w*)$/)[0]}
+						</div>
+						: <img src={thumbnail || src} className={css(classes.source)} />}
 				</a>
 			);
 		});
@@ -83,6 +132,7 @@ class Gallery extends Component {
 				{this.props.subheading && <p>{this.props.subheading}</p>}
 				{this.renderGallery()}
 				<Lightbox
+					previewResolver={previewResolver}
 					currentImage={this.state.currentImage}
 					images={this.props.images}
 					isOpen={this.state.lightboxIsOpen}
@@ -115,6 +165,7 @@ const classes = StyleSheet.create({
 	gallery: {
 		marginRight: -gutter.small,
 		overflow: 'hidden',
+		position: 'relative',
 
 		'@media (min-width: 500px)': {
 			marginRight: -gutter.large,

@@ -46,6 +46,11 @@ const THUMBNAIL_IMAGES = [
 	{ id: '1470742292565-de43c4b02b57', caption: 'Photo by Eric Knoll', orientation: 'landscape' }, // https://unsplash.com/photos/DmOCkOnx-MQ (Cheetah)
 	// https://unsplash.com/photos/NUMlxTPsznM coyote?
 ];
+const THUMBNAIL_DOCUMENTS = [
+	{ id: '1470742292565-de43c4b02b57', orientation: 'square', document: false, caption: 'A Cheetah - photo by Eric Knoll' },
+	{ id: 1, orientation: 'landscape', document: true, src: 'http://che.org.il/wp-content/uploads/2016/12/pdf-sample.pdf', caption: 'Sample PDF document' },
+	{ id: 2, orientation: 'landscape', document: true, src: 'http://cds.cern.ch/record/1516483/files/0321335597_TOC.pdf', caption: 'nVidia GPU Gems 2' },
+];
 
 const theme = {
 	// container
@@ -149,6 +154,17 @@ render(
 			caption,
 			orientation,
 			useForDemo,
+		}))} theme={theme} showThumbnails />
+
+		<h3>Themed Lightbox with documents and thumbnails</h3>
+		<Gallery images={THUMBNAIL_DOCUMENTS.map(({ caption, id, src, document, orientation }) => ({
+			id,
+			src: document ? src : makeUnsplashSrc(id),
+			thumbnail: document ? null : makeUnsplashThumbnail(id),
+			caption,
+			document,
+			orientation,
+			useForDemo: true,
 		}))} theme={theme} showThumbnails />
 	</div>,
 	document.getElementById('example')
