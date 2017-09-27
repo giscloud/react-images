@@ -5,7 +5,7 @@ import { css, StyleSheet } from 'aphrodite/no-important';
 import defaults from '../theme';
 import { deepMerge } from '../utils';
 
-function Thumbnail ({ index, src, thumbnail, active, onClick, document }, { theme }) {
+function Thumbnail ({ index, src, thumbnail, active, onClick, document, extension }, { theme }) {
 	const url = thumbnail ? thumbnail : src;
 	const classes = StyleSheet.create(deepMerge(defaultStyles, theme));
 
@@ -19,8 +19,8 @@ function Thumbnail ({ index, src, thumbnail, active, onClick, document }, { them
 			}}
 			style={document ? {} : { backgroundImage: 'url("' + url + '")' }}
 		>
-			{document && src.match(/\.(\w*)$/)
-				? <div className={css(classes.document)}>{src.match(/\.(\w*)$/)[0]}</div>
+			{document && (extension || src.match(/\.(\w*)$/))
+				? <div className={css(classes.document)}>{extension || src.match(/\.(\w*)$/)[0]}</div>
 				: null}
 		</div>
 	);
