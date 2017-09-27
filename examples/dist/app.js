@@ -52,9 +52,10 @@ var THUMBNAIL_IMAGES = [{ id: '1454991727061-be514eae86f7', caption: 'Photo by T
 { id: '1470583190240-bd6bbde8a569', caption: 'Photo by Alan Emery', orientation: 'landscape' }, // https://unsplash.com/photos/emTCWiq2txk (Beetle)
 { id: '1470688090067-6d429c0b2600', caption: 'Photo by Ján Jakub Naništa', orientation: 'landscape' }, // https://unsplash.com/photos/xqjO-lx39B4 (Scottish Highland Cow)
 { id: '1470742292565-de43c4b02b57', caption: 'Photo by Eric Knoll', orientation: 'landscape' }];
-
 // https://unsplash.com/photos/DmOCkOnx-MQ (Cheetah)
 // https://unsplash.com/photos/NUMlxTPsznM coyote?
+var THUMBNAIL_DOCUMENTS = [{ id: '1470742292565-de43c4b02b57', orientation: 'square', document: false, caption: 'A Cheetah - photo by Eric Knoll' }, { id: 1, orientation: 'landscape', document: true, src: 'http://che.org.il/wp-content/uploads/2016/12/pdf-sample.pdf', caption: 'Sample PDF document' }, { id: 2, orientation: 'landscape', document: true, src: 'http://cds.cern.ch/record/1516483/files/0321335597_TOC.pdf', caption: 'nVidia GPU Gems 2' }];
+
 var theme = {
 	// container
 	container: {
@@ -200,6 +201,27 @@ var theme = {
 				orientation: orientation,
 				useForDemo: useForDemo
 			};
+		}), theme: theme, showThumbnails: true }),
+	_react2['default'].createElement(
+		'h3',
+		null,
+		'Themed Lightbox with documents and thumbnails'
+	),
+	_react2['default'].createElement(_componentsGallery2['default'], { images: THUMBNAIL_DOCUMENTS.map(function (_ref4) {
+			var caption = _ref4.caption;
+			var id = _ref4.id;
+			var src = _ref4.src;
+			var document = _ref4.document;
+			var orientation = _ref4.orientation;
+			return {
+				id: id,
+				src: document ? src : makeUnsplashSrc(id),
+				thumbnail: document ? null : makeUnsplashThumbnail(id),
+				caption: caption,
+				document: document,
+				orientation: orientation,
+				useForDemo: true
+			};
 		}), theme: theme, showThumbnails: true })
 ), document.getElementById('example'));
 
@@ -213,6 +235,8 @@ Object.defineProperty(exports, '__esModule', {
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
 var _get = function get(_x, _x2, _x3) { var _again = true; _function: while (_again) { var object = _x, property = _x2, receiver = _x3; _again = false; if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { _x = parent; _x2 = property; _x3 = receiver; _again = true; desc = parent = undefined; continue _function; } } else if ('value' in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } } };
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -233,6 +257,43 @@ var _aphroditeNoImportant = require('aphrodite/no-important');
 var _reactImages = require('react-images');
 
 var _reactImages2 = _interopRequireDefault(_reactImages);
+
+var previewResolver = function previewResolver(descriptor) {
+	if (descriptor.document.document) {
+		if (!document.documentElement) {
+			return null;
+		} else {
+			var doc = document.documentElement;
+			var w = Math.max(doc.clientWidth, window.innerWidth || 0);
+			var h = Math.max(doc.clientHeight, window.innerHeight || 0);
+
+			var height = Math.min(w, h) * 0.7;
+			var width = Math.min(w, h) * 0.6;
+
+			var onClick = descriptor.onClick;
+			var className = descriptor.className;
+			var src = descriptor.document.src;
+			var style = descriptor.style;
+
+			return _react2['default'].createElement(
+				'div',
+				{
+					className: className,
+					style: _extends({}, style, { width: width, height: height }),
+					onClick: onClick
+				},
+				_react2['default'].createElement('iframe', {
+					title: 'pdf document',
+					src: src,
+					width: '100%',
+					height: '100%'
+				})
+			);
+		}
+	} else {
+		return (0, _reactImages.defaultPreviewResolver)(descriptor);
+	}
+};
 
 var Gallery = (function (_Component) {
 	_inherits(Gallery, _Component);
@@ -311,18 +372,38 @@ var Gallery = (function (_Component) {
 
 			var gallery = images.filter(function (i) {
 				return i.useForDemo;
-			}).map(function (obj, i) {
+			}).map(function (_ref, i) {
+				var src = _ref.src;
+				var orientation = _ref.orientation;
+				var thumbnail = _ref.thumbnail;
+				var document = _ref.document;
+
 				return _react2['default'].createElement(
 					'a',
 					{
-						href: obj.src,
-						className: (0, _aphroditeNoImportant.css)(classes.thumbnail, classes[obj.orientation]),
+						href: src,
+						className: (0, _aphroditeNoImportant.css)(classes.thumbnail, classes[orientation]),
 						key: i,
 						onClick: function (e) {
 							return _this.openLightbox(i, e);
 						}
 					},
-					_react2['default'].createElement('img', { src: obj.thumbnail, className: (0, _aphroditeNoImportant.css)(classes.source) })
+					document ? _react2['default'].createElement(
+						'div',
+						{
+							style: {
+								width: '100%',
+								height: 240,
+								display: 'inline-block',
+								backgroundColor: 'rgb(224, 224, 224)',
+								lineHeight: '240px',
+								color: 'rgb(176, 176, 176)',
+								fontSize: '22px',
+								textAlign: 'center'
+							}
+						},
+						src.match(/\.(\w*)$/) && src.match(/\.(\w*)$/)[0]
+					) : _react2['default'].createElement('img', { src: thumbnail || src, className: (0, _aphroditeNoImportant.css)(classes.source) })
 				);
 			});
 
@@ -350,6 +431,7 @@ var Gallery = (function (_Component) {
 				),
 				this.renderGallery(),
 				_react2['default'].createElement(_reactImages2['default'], {
+					previewResolver: previewResolver,
 					currentImage: this.state.currentImage,
 					images: this.props.images,
 					isOpen: this.state.lightboxIsOpen,
@@ -384,6 +466,7 @@ var classes = _aphroditeNoImportant.StyleSheet.create({
 	gallery: {
 		marginRight: -gutter.small,
 		overflow: 'hidden',
+		position: 'relative',
 
 		'@media (min-width: 500px)': {
 			marginRight: -gutter.large
