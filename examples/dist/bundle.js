@@ -3497,6 +3497,7 @@ function Thumbnail(_ref, _ref2) {
 	var active = _ref.active;
 	var onClick = _ref.onClick;
 	var document = _ref.document;
+	var extension = _ref.extension;
 	var theme = _ref2.theme;
 
 	var url = thumbnail ? thumbnail : src;
@@ -3513,10 +3514,10 @@ function Thumbnail(_ref, _ref2) {
 			},
 			style: document ? {} : { backgroundImage: 'url("' + url + '")' }
 		},
-		document && src.match(/\.(\w*)$/) ? _react2['default'].createElement(
+		document && (extension || src.match(/\.(\w*)$/)) ? _react2['default'].createElement(
 			'div',
 			{ className: (0, _aphroditeNoImportant.css)(classes.document) },
-			src.match(/\.(\w*)$/)[0]
+			extension || src.match(/\.(\w*)$/)[0]
 		) : null
 	);
 }
