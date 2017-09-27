@@ -13,6 +13,30 @@ import Portal from './components/Portal';
 
 import { bindFunctions, canUseDom, deepMerge } from './utils';
 
+
+const defaultPreviewResolver = (descriptor) => {
+	const {
+		onClick,
+		className,
+		sizes,
+		document: { alt, src },
+		srcset,
+		style,
+	} = descriptor;
+
+	return (
+		<img
+			className={className}
+			onClick={onClick}
+			sizes={sizes}
+			alt={alt}
+			src={src}
+			srcSet={srcset}
+			style={style}
+		/>
+	);
+};
+
 class Lightbox extends Component {
 	constructor (props) {
 		super(props);
@@ -169,6 +193,7 @@ class Lightbox extends Component {
 			showCloseButton,
 			showThumbnails,
 			width,
+			toolbar,
 		} = this.props;
 
 		if (!isOpen) return <span key="closed" />;
@@ -184,6 +209,11 @@ class Lightbox extends Component {
 				onClick={!!backdropClosesModal && this.closeBackdrop}
 				onTouchEnd={!!backdropClosesModal && this.closeBackdrop}
 			>
+				{toolbar
+						? <div className={css(classes.toolbar)}>
+							{toolbar(this.props, this.state)}
+						</div>
+						: null}
 				<div className={css(classes.content)} style={{ marginBottom: offsetThumbnails, maxWidth: width }}>
 					<Header
 						customControls={customControls}
@@ -208,6 +238,7 @@ class Lightbox extends Component {
 			onClickImage,
 			showImageCount,
 			showThumbnails,
+			previewResolver,
 		} = this.props;
 
 		if (!images || !images.length) return null;
@@ -234,18 +265,17 @@ class Lightbox extends Component {
 					https://fb.me/react-unknown-prop is resolved
 					<Swipeable onSwipedLeft={this.gotoNext} onSwipedRight={this.gotoPrev} />
 				*/}
-				<img
-					className={css(classes.image)}
-					onClick={!!onClickImage && onClickImage}
-					sizes={sizes}
-					alt={image.alt}
-					src={image.src}
-					srcSet={srcset}
-					style={{
+				{previewResolver({
+					className: css(classes.image),
+					onClick: !!onClickImage && onClickImage,
+					style: {
 						cursor: this.props.onClickImage ? 'pointer' : 'auto',
 						maxHeight: `calc(100vh - ${heightOffset})`,
-					}}
-				/>
+					},
+					sizes,
+					srcset,
+					document: image,
+				})}
 				<Footer
 					caption={images[currentImage].caption}
 					countCurrent={currentImage + 1}
@@ -301,12 +331,14 @@ Lightbox.propTypes = {
 	onClickPrev: PropTypes.func,
 	onClose: PropTypes.func.isRequired,
 	preloadNextImage: PropTypes.bool,
+	previewResolver: PropTypes.func,
 	rightArrowTitle: PropTypes.string,
 	showCloseButton: PropTypes.bool,
 	showImageCount: PropTypes.bool,
 	showThumbnails: PropTypes.bool,
 	theme: PropTypes.object,
 	thumbnailOffset: PropTypes.number,
+	toolbar: PropTypes.func,
 	width: PropTypes.number,
 };
 Lightbox.defaultProps = {
@@ -317,11 +349,13 @@ Lightbox.defaultProps = {
 	leftArrowTitle: 'Previous (Left arrow key)',
 	onClickShowNextImage: true,
 	preloadNextImage: true,
+	previewResolver: defaultPreviewResolver,
 	rightArrowTitle: 'Next (Right arrow key)',
 	showCloseButton: true,
 	showImageCount: true,
 	theme: {},
 	thumbnailOffset: 2,
+	toolbar: null,
 	width: 1024,
 };
 Lightbox.childContextTypes = {
@@ -345,6 +379,15 @@ const classes = StyleSheet.create({
 		WebkitTouchCallout: 'none',
 		userSelect: 'none',
 	},
+	toolbar: {
+		backgroundColor: 'rgb(255, 255, 255)',
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		zIndex: 1000,
+	},
 });
 
 export default Lightbox;
+export { defaultPreviewResolver };
